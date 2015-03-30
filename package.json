@@ -1,0 +1,32 @@
+{
+  "name": "bunyan-tooled",
+  "version": "0.1.0",
+  "description": "Bunyan logger tooled with logstash and syslog",
+  "main": "logger.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "coffee -c -o . logger.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EruditorGroup/bunyan-tooled.git"
+  },
+  "keywords": [
+    "bunyan",
+    "syslog",
+    "logstash",
+    "log",
+    "logger",
+    "logging"
+  ],
+  "author": "Elia Schelokov <thaumant@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EruditorGroup/bunyan-tooled/issues"
+  },
+  "homepage": "https://github.com/EruditorGroup/bunyan-tooled",
+  "dependencies": {
+    "bunyan-logstash": "^0.2.0",
+    "bunyan-syslog": "^0.3.0"
+  }
+}
