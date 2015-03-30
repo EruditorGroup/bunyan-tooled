@@ -4,6 +4,15 @@ bunyan = require "bunyan"
 {isFinite} = Number
 
 
+levelMapping =
+    10: "trace"
+    20: "debug"
+    30: "info"
+    40: "warn"
+    50: "error"
+    60: "fatal"
+
+
 construct = (options) ->
     streams = [{stream: process.stdout}]
     syslogFail = false
@@ -13,7 +22,7 @@ construct = (options) ->
         try
             opts = makeSyslogOptions process.env.BUNYAN_SYSLOG_URL, options
             streams.push
-                level: "debug" # there are no trace level in syslog
+                level: levelMapping[options.level] or "trace"
                 type:  "raw"
                 stream: require('bunyan-syslog').createBunyanStream opts
         catch e
@@ -66,7 +75,7 @@ makeLogstashOptions = (url, params={}) ->
     opts = 
         port: Number url.port
         host: url.hostname
-        level: "debug"
+        level: levelMapping[params.level] or "trace"
     if params.name then opts.application = params.name
     tags = if url.query.tags then url.query.tags.split ','
     if tags then opts.tags = tags
