@@ -7,7 +7,7 @@ Syslog is supported through BUNYAN_SYSLOG_URL environment variable which takes t
 $ export BUNYAN_SYSLOG_URL=tcp://localhost:123?facility=18
 ```
 Where parameters are:
-- **protocol**: tcp and udp are supported;
+- **protocol**: required, tcp and udp are supported;
 - **host**: required;
 - **port**: required;
 - **facility**: optional, 16 by default.
@@ -25,8 +25,8 @@ Where parameters are:
 
 ## Options
 Supported options:
-- **name**: passed to bunyan.createLogger;
-- **level**: optional, 10 by default, passed to bunyan.createLogger;
-- **component**: optional, passed to bunyan.createLogger;
+- **name**: passed to bunyan.createLogger();
+- **level**: optional, 10 by default, passed to streams parameters and bunyan.createLogger();
+- **component**: optional, passed to bunyan.createLogger();
 - **strict**: optional, false by default, throw an error if env variable presented but invalid, logger.warn otherwise;
 - **shortStacks**: optional, true by default, remove modules and nodejs files from error traces.
