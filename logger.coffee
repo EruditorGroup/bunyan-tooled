@@ -87,7 +87,7 @@ makeErrorSerializer = (options={}) ->
             .split '\n'
             .filter (line) ->
                 not ((line.match /node_modules/) or # like "at Foo.bar (/dirname/node_modules/foo/main.js:12:34)"
-                     (line.match /at node\.js:\d+:\d+$/) or # like "at startup (node.js:119:16)"
+                     (line.match /at node\.js:\d+:\d+$/) or # like "at node.js:119:16"
                      (line.match /^\s+at.*\([^\/\\]+\.js:\d+:\d+\)$/)) # like "at Module.load (module.js:356:32)"
             .join '\n'
         serialized
