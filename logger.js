@@ -8,14 +8,8 @@
 
   isFinite = Number.isFinite;
 
-  construct = function(loggerParams, options) {
+  construct = function(options) {
     var e, err, logger, logstashFail, opts, streams, syslogFail;
-    if (options == null) {
-      options = {
-        strict: false,
-        shortStacks: true
-      };
-    }
     streams = [
       {
         stream: process.stdout
@@ -25,7 +19,7 @@
     logstashFail = false;
     if (process.env.BUNYAN_SYSLOG_URL) {
       try {
-        opts = makeSyslogOptions(process.env.BUNYAN_SYSLOG_URL, loggerParams);
+        opts = makeSyslogOptions(process.env.BUNYAN_SYSLOG_URL, options);
         streams.push({
           level: "debug",
           type: "raw",
@@ -38,7 +32,7 @@
     }
     if (process.env.BUNYAN_LOGSTASH_URL) {
       try {
-        opts = makeLogstashOptions(process.env.BUNYAN_LOGSTASH_URL, loggerParams);
+        opts = makeLogstashOptions(process.env.BUNYAN_LOGSTASH_URL, options);
         streams.streams.push({
           type: 'raw',
           stream: require('bunyan-logstash').createStream(opts)
@@ -49,16 +43,16 @@
       }
     }
     logger = bunyan.createLogger({
-      name: loggerParams.name,
-      level: loggerParams.level || 10,
+      name: options.name,
+      level: options.level || 10,
       streams: streams,
       serializers: {
         err: makeErrorSerializer(options)
       }
     });
-    if (loggerParams.component) {
+    if (options.component) {
       logger = logger.child({
-        component: loggerParams.component
+        component: options.component
       });
     }
     if (syslogFail) {
@@ -90,7 +84,7 @@
       port: Number(url.port),
       host: url.hostname,
       facility: url.query.facility ? Number(url.query.facility.slice(1)) : NaN,
-      type: url.protocol.slice(0, -1)
+      type: (url.protocol || '').slice(0, -1)
     };
     if (!(opts.port > 0)) {
       throw new Error("Invalid port number (" + url.port + ")");
@@ -118,14 +112,14 @@
       host: url.hostname,
       level: "debug"
     };
-    if (params.application) {
+    if (params.name) {
       opts.application = params.name;
     }
     tags = url.query.tags ? url.query.tags.split(',') : void 0;
     if (tags) {
       opts.tags = tags;
     }
-    protocol = (url.protocol || "udp:").slice(0, -1);
+    protocol = (url.protocol || '').slice(0, -1);
     if (!(opts.port > 0)) {
       throw new Error("Invalid port number (" + url.port + ")");
     }
@@ -139,7 +133,10 @@
   };
 
   makeErrorSerializer = function(options) {
-    if (!options.shortStacks) {
+    if (options == null) {
+      options = {};
+    }
+    if (options.shortStacks === false) {
       return bunyan.stdSerializers.err;
     } else {
       return function(err) {

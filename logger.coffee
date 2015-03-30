@@ -4,14 +4,14 @@ bunyan = require "bunyan"
 {isFinite} = Number
 
 
-construct = (loggerParams, options={strict: false, shortStacks: true}) ->
+construct = (options) ->
     streams = [{stream: process.stdout}]
     syslogFail = false
     logstashFail = false
 
     if process.env.BUNYAN_SYSLOG_URL
         try
-            opts = makeSyslogOptions process.env.BUNYAN_SYSLOG_URL, loggerParams
+            opts = makeSyslogOptions process.env.BUNYAN_SYSLOG_URL, options
             streams.push
                 level: "debug" # there are no trace level in syslog
                 type:  "raw"
@@ -21,7 +21,7 @@ construct = (loggerParams, options={strict: false, shortStacks: true}) ->
 
     if process.env.BUNYAN_LOGSTASH_URL
         try
-            opts = makeLogstashOptions process.env.BUNYAN_LOGSTASH_URL, loggerParams
+            opts = makeLogstashOptions process.env.BUNYAN_LOGSTASH_URL, options
             streams.streams.push
                 type: 'raw'
                 stream: require('bunyan-logstash').createStream opts
@@ -29,12 +29,12 @@ construct = (loggerParams, options={strict: false, shortStacks: true}) ->
             logstashFail = e
 
     logger = bunyan.createLogger
-        name:    loggerParams.name
-        level:   loggerParams.level or 10
+        name:    options.name
+        level:   options.level or 10
         streams: streams
         serializers: err: makeErrorSerializer options
 
-    if loggerParams.component then logger = logger.child {component: loggerParams.component}
+    if options.component then logger = logger.child {component: options.component}
 
     if syslogFail
         err = new Error "Failed to add syslog stream to bunyan: #{syslogFail.message}"
@@ -53,7 +53,7 @@ makeSyslogOptions = (url, params={}) ->
         port: Number url.port
         host: url.hostname
         facility: if url.query.facility then Number url.query.facility[1..] else NaN
-        type: url.protocol[0..-2]
+        type: (url.protocol or '')[0...-1]
     if not (opts.port > 0) then throw new Error "Invalid port number (#{url.port})"
     if not opts.host then throw new Error "Invalid host (#{url.hostname})"
     if opts.type not in ["tcp", "udp"] then throw new Error "Unsupported protocol (#{url.protocol})"
@@ -67,18 +67,18 @@ makeLogstashOptions = (url, params={}) ->
         port: Number url.port
         host: url.hostname
         level: "debug"
-    if params.application then opts.application = params.name
+    if params.name then opts.application = params.name
     tags = if url.query.tags then url.query.tags.split ','
     if tags then opts.tags = tags
-    protocol = (url.protocol or "udp:")[0..-2]
+    protocol = (url.protocol or '')[0...-1]
     if not (opts.port > 0) then throw new Error "Invalid port number (#{url.port})"
     if not opts.host then throw new Error "Invalid host (#{url.hostname})"
     if protocol != "udp" then throw new Error "Unsupported protocol (#{url.protocol})"
     opts
 
 
-makeErrorSerializer = (options) ->
-    if not options.shortStacks then bunyan.stdSerializers.err
+makeErrorSerializer = (options={}) ->
+    if options.shortStacks == false then bunyan.stdSerializers.err
     else (err) ->
         serialized = bunyan.stdSerializers.err err
         if serialized == null then return serialized
