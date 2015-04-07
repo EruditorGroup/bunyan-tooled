@@ -92,7 +92,7 @@
     opts = {
       port: Number(url.port),
       host: url.hostname,
-      facility: url.query.facility ? Number(url.query.facility.slice(1)) : NaN,
+      facility: url.query.facility ? Number(url.query.facility) : NaN,
       type: (url.protocol || '').slice(0, -1)
     };
     if (!(opts.port > 0)) {

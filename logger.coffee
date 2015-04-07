@@ -61,7 +61,7 @@ makeSyslogOptions = (url, params={}) ->
     opts =
         port: Number url.port
         host: url.hostname
-        facility: if url.query.facility then Number url.query.facility[1..] else NaN
+        facility: if url.query.facility then Number url.query.facility else NaN
         type: (url.protocol or '')[0...-1]
     if not (opts.port > 0) then throw new Error "Invalid port number (#{url.port})"
     if not opts.host then throw new Error "Invalid host (#{url.hostname})"
