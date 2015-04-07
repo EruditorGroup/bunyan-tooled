@@ -1,6 +1,6 @@
 {
   "name": "bunyan-tooled",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bunyan logger tooled with logstash and syslog",
   "main": "logger.js",
   "scripts": {
